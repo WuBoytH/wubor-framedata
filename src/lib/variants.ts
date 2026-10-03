@@ -4,7 +4,8 @@
 // with a label that spells out every condition. For reading we want:
 //   * Light / Medium / Heavy strength variants first, in that order;
 //   * then the unmodified move (every other condition false) with no label;
-//   * then modified versions, labelled by just the conditions that are on.
+//   * then modified versions, labelled by just the conditions that are on;
+//   * a strength branch that tests all of W/M/S and matches none is dropped.
 import type { Variant } from './types'
 
 export interface VariantView {
@@ -13,8 +14,10 @@ export interface VariantView {
   variant: Variant
   /** '' for the unmodified move */
   label: string
-  /** 0 Light, 1 Medium, 2 Heavy, 3 other strength value, null = no strength conditions */
+  /** 0 Light, 1 Medium, 2 Heavy; null = no strength conditions */
   strength: number | null
+  /** every strength value tested and all false — the branch can't run */
+  unreachable: boolean
   /** conditions that are on, shortened */
   modifiers: string[]
 }
@@ -33,6 +36,7 @@ export function shortCondition(text: string): string {
   return t
     .replace(/vars::[\w:]*::/g, '')
     .replace(/FIGHTER_\w+?_INSTANCE_WORK_ID_(?:FLAG|INT|FLOAT)_/g, '')
+    .replace(/FIGHTER_\w+?_STATUS_\w+?_(?:FLAG|WORK_INT|WORK_FLOAT|INT|FLOAT)_/g, '')
     .replace(/FIGHTER_\w+?_GENERATE_ARTICLE_/g, '')
 }
 
@@ -51,25 +55,30 @@ function view(variant: Variant, index: number): VariantView {
   }
   let strength: number | null = null
   let strengthLabel = ''
+  let unreachable = false
   if (mentioned.size) {
     // All strength checks false → it's the one value the script didn't test for.
+    // If it tested all three, nothing is left: that branch never runs.
     const letter = on ?? ['W', 'M', 'S'].filter((l) => !mentioned.has(l)).join('')
     if (letter in STRENGTH_RANK) {
       strength = STRENGTH_RANK[letter]
       strengthLabel = STRENGTH_NAME[letter]
     } else {
-      strength = 3
-      strengthLabel = 'Other strength'
+      unreachable = true
     }
   }
   const label = [strengthLabel, ...modifiers].filter(Boolean).join(' · ')
-  return { index, variant, label, strength, modifiers }
+  return { index, variant, label, strength, modifiers, unreachable }
 }
 
-/** Variants in display order. A script with a single unconditional variant gives one view with label ''. */
+/**
+ * Variants in display order, unreachable ones dropped. A script with a single
+ * unconditional variant gives one view with label ''.
+ */
 export function orderVariants(variants: Variant[]): VariantView[] {
   return variants
     .map(view)
+    .filter((v) => !v.unreachable)
     .sort(
       (a, b) =>
         (a.strength ?? 9) - (b.strength ?? 9) ||

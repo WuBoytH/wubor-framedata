@@ -1,15 +1,20 @@
 <script lang="ts">
-  import type { Summary } from '../lib/format'
+  import type { Summary, LandingLag } from '../lib/format'
   import { fmtSpans, fmtNum } from '../lib/format'
 
   export interface Row {
     href: string
     name: string
     script: string
+    /** label of the variant whose numbers are shown ('' = unmodified) */
     variant: string
+    /** all variant labels, display order */
+    variants: string[]
+    /** some other variant has different frame data from the one shown */
+    variantsDiffer: boolean
     modded: boolean
     summary: Summary
-    landing: number | null
+    landing: LandingLag | null
     cancels: number
     intangible: string | null
   }
@@ -46,10 +51,18 @@
           <td class="num">{s.total === null ? '—' : fmtNum(s.total)}</td>
           <td class="mono">{s.damage.length ? s.damage.map(fmtNum).join('/') : '—'}</td>
           {#if showLanding}
-            <td class="num">{r.landing ?? '—'}</td>
+            <td class="num">
+              {#if r.landing}
+                {r.landing.lag}
+                {#if r.landing.shoot !== null}<span class="small muted shoot" title="Bullet Arts: added to the base landing lag when shooting during the aerial">+{r.landing.shoot}</span>{/if}
+              {:else}—{/if}
+            </td>
             <td class="mono">{s.autocancel.length ? fmtSpans(s.autocancel) : '—'}</td>
           {/if}
           <td class="small muted">
+            {#if r.variants.length > 1}
+              <span class="chip" title={r.variants.join(' · ')}>{r.variants.length} variants{r.variantsDiffer ? ', data differs' : ''}</span>
+            {/if}
             {#if r.intangible}<span class="chip">intangible {r.intangible}</span>{/if}
             {#if r.cancels}<span class="chip">{r.cancels} cancel{r.cancels === 1 ? '' : 's'}</span>{/if}
           </td>
@@ -61,4 +74,7 @@
 
 <style>
   .chip { margin-right: .3rem; }
+  td:first-child { max-width: 320px; }
+  td:first-child .mono { overflow-wrap: anywhere; }
+  .shoot { white-space: nowrap; }
 </style>

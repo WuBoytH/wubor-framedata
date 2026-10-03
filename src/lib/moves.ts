@@ -2,6 +2,7 @@
 // Per-fighter names come from src/data/move-names.ts and win over the rules here.
 
 import { MOVE_NAMES } from '../data/move-names'
+import { MOVE_ORDER } from '../data/move-order'
 
 export type Category =
   | 'Ground Normals'
@@ -40,6 +41,21 @@ const key = (...parts: (number | string)[]) => parts.map((p) => (typeof p === 'n
 /** Smashes: `start`/`hold`/`charge` come before the main hit; other suffixes after it, alphabetically. */
 const stage = (s: string) => (s === 'start' ? '0' : s === 'hold' || s === 'charge' ? '1' : s === '' ? '2' : `3${s}`)
 /** Everything else: the plain script first, then start/hold, then other suffixes alphabetically. */
+/**
+ * Specials: suffix → [variant number, stage]. `2start` → ['2', 'start'].
+ * Stages run start → hold → main → loop → (others, alphabetical) → end, so a
+ * special's scripts group as start / main / end per ground, air, and number.
+ */
+const specialParts = (s: string): [number, string] => {
+  const m = s.match(/^(\d*)(.*)$/)!
+  const stage = m[2]
+  const rank = stage === 'start' ? '0' : stage === 'hold' || stage === 'charge' ? '1' : stage === '' ? '2' : stage === 'loop' ? '3' : stage === 'end' ? '9' : `5${stage}`
+  return [m[1] ? +m[1] : 0, rank]
+}
+const specialName = (dir: string, air: string | undefined, s: string) => {
+  const m = s.match(/^(\d*)(.*)$/)!
+  return `${DIR[dir]} Special${air ? ' (air)' : ''}${m[1] ? ` ${m[1]}` : ''}${suffix(m[2])}`
+}
 const sfx = (s: string) => (s === '' ? '0' : s === 'start' ? '1' : s === 'hold' || s === 'charge' ? '2' : `3${s}`)
 
 const RULES: Rule[] = [
@@ -64,10 +80,10 @@ const RULES: Rule[] = [
   [/^catchattack$/, () => 'Pummel', 'Grabs & Throws', () => key(0, 3)],
   [/^catch(\w+)$/, (m) => `Grab (${m[1]})`, 'Grabs & Throws', () => key(0, 4)],
   [/^throw(f|b|hi|lw)(\w*)$/, (m) => `${DIR[m[1]]} Throw${suffix(m[2])}`, 'Grabs & Throws', (m) => key(1, idx(['f', 'b', 'hi', 'lw'], m[1]), sfx(m[2]))],
-  // specials: per direction, ground then air; suffixed versions after, ground then air per suffix
-  [/^special(air)?(n|s|hi|lw)(\w*)$/, (m) => `${DIR[m[2]]} Special${m[1] ? ' (air)' : ''}${suffix(m[3])}`, 'Specials', (m) => key(idx(SPECIAL_DIRS, m[2]), sfx(m[3]), m[1] ? 1 : 0)],
+  // specials: per direction → ground then air → variant number → start / main / end
+  [/^special(air)?(n|s|hi|lw)(\w*)$/, (m) => specialName(m[2], m[1], m[3]), 'Specials', (m) => key(idx(SPECIAL_DIRS, m[2]), m[1] ? 1 : 0, ...specialParts(m[3]))],
   // Samus / Dark Samus: bare `special`/`specialair` is the side special (Missile)
-  [/^special(air)?$/, (m) => `Side Special${m[1] ? ' (air)' : ''}`, 'Specials', (m) => key(idx(SPECIAL_DIRS, 's'), '', m[1] ? 1 : 0)],
+  [/^special(air)?$/, (m) => `Side Special${m[1] ? ' (air)' : ''}`, 'Specials', (m) => key(idx(SPECIAL_DIRS, 's'), m[1] ? 1 : 0, 0, '2')],
   // dodges, ledge, getups
   [/^escapen$/, () => 'Spot Dodge', 'Dodges & Ledge', () => key(0, 0)],
   [/^escapef$/, () => 'Roll (forward)', 'Dodges & Ledge', () => key(0, 1)],
@@ -94,15 +110,21 @@ const cache = new Map<string, MoveInfo>()
 
 /**
  * Name/category/order for a script. `fighter` and `agent` enable the
- * hand-written overrides; the sort order always comes from the rules.
+ * hand-written overrides (src/data/move-names.ts, src/data/move-order.ts).
  */
 export function moveInfo(script: string, fighter?: string, agent?: string): MoveInfo {
-  const base = ruleInfo(script)
-  if (!fighter) return base
-  const key = agent && agent !== fighter ? `${agent}/${script}` : script
-  const o = MOVE_NAMES[fighter]?.[key] ?? MOVE_NAMES['*']?.[key]
-  if (o === undefined) return base
-  return typeof o === 'string' ? { ...base, name: o } : { ...base, name: o.name, category: o.category ?? base.category }
+  let info = ruleInfo(script)
+  if (!fighter) return info
+  const k = agent && agent !== fighter ? `${agent}/${script}` : script
+  const o = MOVE_NAMES[fighter]?.[k] ?? MOVE_NAMES['*']?.[k]
+  if (o !== undefined) {
+    info = typeof o === 'string' ? { ...info, name: o } : { ...info, name: o.name, category: o.category ?? info.category }
+  }
+  // Manual order: fighter list first, then '*'; '!' sorts before every automatic key.
+  const manual = [...(MOVE_ORDER[fighter] ?? []), ...(MOVE_ORDER['*'] ?? [])]
+  const pos = manual.indexOf(k)
+  if (pos >= 0) info = { ...info, order: `!${String(pos).padStart(3, '0')}` }
+  return info
 }
 
 function ruleInfo(script: string): MoveInfo {

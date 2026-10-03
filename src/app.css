@@ -58,7 +58,7 @@ code, .mono { font-family: var(--mono); font-size: .92em; }
 .page { max-width: 1200px; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
 
 table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+th, td { text-align: left; padding: .35rem .5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
 th { font-weight: 600; color: var(--text-2); font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
 td.num, th.num { text-align: right; }
 tbody tr:hover { background: var(--surface-2); }

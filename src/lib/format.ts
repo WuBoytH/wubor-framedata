@@ -88,6 +88,30 @@ export function summarize(v: Variant, fields: string[]): Summary {
   }
 }
 
+export interface LandingLag {
+  /** frames of landing lag for this aerial (absolute) */
+  lag: number
+  /** key it came from: `n`, `n2`, `f3`, … */
+  key: string
+  /** Bayonetta: extra frames added when Bullet Arts were used during the aerial */
+  shoot: number | null
+}
+
+/**
+ * Landing lag for an aerial script from the fighter's `landing_lag` map.
+ * `attackairn2` prefers the `n2` key (Sora's absolute values) and falls back
+ * to `n` (Bayonetta's fair 2/3 share the base); `<dir>_shoot` rides along.
+ */
+export function landingLag(table: Record<string, number>, script: string): LandingLag | null {
+  const m = script.match(/^game_attackair(n|f|b|hi|lw)(\d*)/)
+  if (!m) return null
+  const [, dir, num] = m
+  const key = num && table[dir + num] !== undefined ? dir + num : dir
+  const lag = table[key]
+  if (lag === undefined) return null
+  return { lag, key, shoot: table[`${dir}_shoot`] ?? null }
+}
+
 export const hasHitboxes = (s: Script) => s.variants.some((v) => v.windows.length > 0)
 
 /** Windows with the same span merged into one (hitboxes concatenated), in start order. */

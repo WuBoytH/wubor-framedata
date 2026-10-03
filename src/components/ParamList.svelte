@@ -13,21 +13,25 @@
   )
 </script>
 
-<aside class="params">
-  <div class="head">
-    <h2>Params <span class="muted small">{params.length}</span></h2>
-    <p class="small muted">
-      <code>fighter_param.prc</code> entry. <mark>Highlighted</mark> = changed by the mod ({changed}).{#if hidden}
+<section class="params">
+  <div class="head row">
+    <h2 id="params">Params <span class="muted small">{params.length}</span></h2>
+    <!-- <p class="small muted">
+      <code>fighter_param.prc</code> entry. <mark>Highlighted</mark> = changed by the mod ({changed}). {#if hidden}
         {hidden} hidden by <code>visibility.ts</code>.{/if}
+    </p> -->
+    <p class="small muted">
+      <code>fighter_param.prc</code> entry. <mark>Highlighted</mark> = changed by the mod ({changed}).
     </p>
+    <span class="grow"></span>
     <input type="search" placeholder="Filter…" bind:value={q} aria-label="Filter params" />
     <label class="small"><input type="checkbox" bind:checked={changedOnly} /> changed only</label>
   </div>
-  <div class="list" role="table">
+  <div class="list">
     {#each shown as p (p.key)}
-      <div class="row" class:changed={p.changed} role="row" title={p.changed ? `vanilla: ${fmtVal(p.vanilla ?? null)}` : undefined}>
-        <span class="key mono" role="cell">{p.key}</span>
-        <span class="val mono" role="cell">
+      <div class="prow" class:changed={p.changed} title={p.changed ? `vanilla: ${fmtVal(p.vanilla ?? null)}` : undefined}>
+        <span class="key mono">{p.key}</span>
+        <span class="val mono">
           {fmtVal(p.value)}
           {#if p.changed}<s class="old">{p.vanilla === null || p.vanilla === undefined ? 'new' : fmtVal(p.vanilla)}</s>{/if}
         </span>
@@ -36,24 +40,26 @@
       <p class="small muted">No params match.</p>
     {/each}
   </div>
-</aside>
+</section>
 
 <style>
-  .params { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; min-height: 0; }
-  .head { padding: .75rem .9rem .5rem; border-bottom: 1px solid var(--border); }
-  .head h2 { margin: 0 0 .25rem; font-size: 1.05rem; }
-  .head p { margin: 0 0 .5rem; }
-  .head input[type='search'] { width: 100%; max-width: none; padding: .3rem .6rem; }
-  .head label { display: block; margin-top: .4rem; color: var(--text-2); }
+  .params { margin-bottom: .5rem; }
+  .head { align-items: center; gap: .5rem 1rem; }
+  .head h2 { margin: 0; }
+  .head p { margin: 0; flex-basis: 100%; }
+  .head input[type='search'] { width: 220px; padding: .3rem .6rem; }
+  .head label { color: var(--text-2); white-space: nowrap; }
+  .grow { flex: 1; }
   mark { background: var(--hl); color: inherit; padding: 0 .15em; border-radius: 2px; }
-  .list { overflow-y: auto; padding: .25rem 0; font-variant-numeric: tabular-nums; }
-  .row { display: flex; justify-content: space-between; gap: .75rem; padding: .15rem .9rem; font-size: .8rem; line-height: 1.35; }
-  .row:hover { background: var(--surface-2); }
-  .row.changed { background: var(--hl); box-shadow: inset 3px 0 0 var(--mod); }
-  .row.changed:hover { background: color-mix(in oklab, var(--hl), var(--text) 6%); }
+  /* multi-column: file order runs down each column, then the next */
+  .list { columns: 300px; column-gap: 1.5rem; margin-top: .5rem; font-variant-numeric: tabular-nums; }
+  .prow { break-inside: avoid; display: flex; justify-content: space-between; gap: .75rem; padding: .2rem .5rem; font-size: .8rem; line-height: 1.35; border-bottom: 1px solid var(--border); }
+  .prow:hover { background: var(--surface-2); }
+  .prow.changed { background: var(--hl); box-shadow: inset 3px 0 0 var(--mod); }
+  .prow.changed:hover { background: color-mix(in oklab, var(--hl), var(--text) 6%); }
   .key { color: var(--text-2); overflow-wrap: anywhere; }
-  .row.changed .key { color: var(--text); }
+  .prow.changed .key { color: var(--text); }
   .val { text-align: right; white-space: nowrap; flex-shrink: 0; }
-  .row.changed .val { font-weight: 600; }
+  .prow.changed .val { font-weight: 600; }
   .old { display: block; font-weight: 400; color: var(--text-3); font-size: .75rem; }
 </style>

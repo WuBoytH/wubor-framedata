@@ -9,6 +9,8 @@
 //   or regular expressions (/^camera_/).
 // * MOVES match script names (`game_attack11`); article scripts are
 //   `agent/script` (`mario_fireball/game_fly`). PARAMS match param keys.
+// * ARTICLES match whole article agents (`mario_hugeflame`, `*_final*`) and
+//   remove the article's entire table from the Articles section.
 // * Hidden moves still open from a direct link; they just leave the lists.
 
 export type Pattern = string | RegExp
@@ -68,4 +70,20 @@ export const MOVES: Record<string, Rules> = {
     // e.g. exclude: ['game_appeal*', 'game_final*']
   },
   // e.g. samus: { exclude: ['game_specials', 'game_specialairs'] },
+  ryu: {
+    exclude: [
+      'game_speciallwstepf',
+      'game_speciallwstepb',
+      'game_speciallwturn',
+      'game_specialairlwturn',
+      'game_attacknearw',
+    ]
+  },
+}
+
+export const ARTICLES: Record<string, Rules> = {
+  '*': {
+    // e.g. exclude: ['*_final*'],
+  },
+  // e.g. mario: { exclude: ['mario_hugeflame'] },
 }

@@ -1,3 +1,5 @@
+import { ARTICLE_NAMES } from '../data/article-names'
+
 /** Internal fighter directory name → display name. */
 const NAMES: Record<string, string> = {
   bayonetta: 'Bayonetta', brave: 'Hero', buddy: 'Banjo & Kazooie', captain: 'Captain Falcon',
@@ -26,8 +28,14 @@ const NAMES: Record<string, string> = {
 
 export const fighterName = (id: string) => NAMES[id] ?? id
 
-/** Article agent (`mario_fireball`) → `fireball`; the fighter's own agent → ''. */
+/**
+ * Article agent → display name: `ARTICLE_NAMES` if set, else the agent name
+ * with the fighter prefix stripped (`mario_fireball` → `fireball`). The
+ * fighter's own agent → ''.
+ */
 export function agentLabel(agent: string, fighter: string) {
   if (agent === fighter) return ''
+  const named = ARTICLE_NAMES[fighter]?.[agent]
+  if (named) return named
   return agent.startsWith(fighter + '_') ? agent.slice(fighter.length + 1) : agent
 }

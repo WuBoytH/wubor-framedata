@@ -36,12 +36,20 @@ Air). Fighter-specific names live in **`src/data/move-names.ts`** — add an ent
 under the fighter's id to rename a script (`game_specialn: 'Fireball'`), or
 give `{ name, category }` to also move it to another section. Article scripts
 are keyed `agent/script`; the `'*'` section applies to every fighter.
+`ARTICLE_NAMES` in the same file renames an article's heading
+(`mario: { mario_fireball: 'Fireball' }`).
+
+Order within a category is automatic (jabs → dash → tilts; start → main → end
+for specials, …). To pin it by hand, list scripts in **`src/data/move-order.ts`**
+under the fighter: listed scripts go to the top of their category in that
+order, the rest follow automatically.
 
 ## Showing and hiding things
 
 **`src/data/visibility.ts`** holds include/exclude lists for the fighter page:
-`PARAMS` (sidebar keys) and `MOVES` (script names, `agent/script` for
-articles), each with a `'*'` section and optional per-fighter sections.
+`PARAMS` (sidebar keys), `MOVES` (script names, `agent/script` for
+articles) and `ARTICLES` (whole article agents), each with a `'*'` section
+and optional per-fighter sections.
 `exclude` hides matches; a non-empty `include` shows only matches. Patterns
 are exact strings, `*` wildcards, or regexes. Hidden moves still open from a
 direct link.
