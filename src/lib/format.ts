@@ -81,7 +81,9 @@ export function summarize(v: Variant, fields: string[]): Summary {
     startup: starts.length ? Math.min(...starts) : null,
     active: mergeSpans(v.windows),
     damage: [...dmg].sort((a, b) => b - a),
-    faf: v.faf ?? null,
+    // A FAF only exists when the script sets a cancel frame; `motion_end` means
+    // the compiler synthesised anim_end + 1, which is just the total in disguise.
+    faf: v.faf_source === 'motion_end' ? null : v.faf ?? null,
     total: v.total_frames ?? null,
     autocancel: v.autocancel,
     hitboxes: v.windows.reduce((n, w) => n + w.hitboxes.length, 0),

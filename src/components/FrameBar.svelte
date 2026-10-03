@@ -10,10 +10,13 @@
   interface Seg { start: number; end: number; title: string }
   interface Lane { label: string; role: 'active' | 'autocancel' | 'cancel' | 'intangible'; segs: Seg[] }
 
+  // No cancel frame → the "FAF" is just anim end + 1, so the strip ends at the
+  // animation and is labelled Total instead.
+  const faf = $derived(variant.faf_source === 'motion_end' ? null : variant.faf ?? null)
   const total = $derived.by(() => {
     const ends = [
       Math.ceil(variant.total_frames ?? 0),
-      variant.faf ?? 0,
+      faf ?? 0,
       ...variant.windows.map((w) => w.end ?? w.start),
       ...variant.autocancel.map((w) => w.end ?? w.start),
       ...variant.cancels.map((c) => c.window.end ?? c.window.start),
@@ -49,8 +52,10 @@
     return out
   })
 
-  const faf = $derived(variant.faf ?? null)
-  const ticks = $derived([1, ...Array.from({ length: Math.floor(total / 5) }, (_, i) => (i + 1) * 5)].filter((t) => faf === null || Math.abs(t - faf) > 3))
+  // Label the end of the strip: the FAF when there is one, else the total.
+  const endLabel = $derived(faf !== null && faf <= total ? 'faf' : variant.faf_source === 'motion_end' ? 'total' : null)
+  const mark = $derived(endLabel === 'faf' ? faf! : endLabel === 'total' ? total : null)
+  const ticks = $derived([1, ...Array.from({ length: Math.floor(total / 5) }, (_, i) => (i + 1) * 5)].filter((t) => mark === null || Math.abs(t - mark) > 3))
   let hover = $state<number | null>(null)
 
   const atFrame = (f: number) =>
@@ -65,8 +70,10 @@
     {#each ticks as t}
       <div class="tick small faint" style="grid-column:{t + 1}">{t}</div>
     {/each}
-    {#if faf !== null && faf <= total}
-      <div class="tick small faf-label" style="grid-column:{faf + 1}">FAF {faf}</div>
+    {#if endLabel === 'faf'}
+      <div class="tick small faf-label" style="grid-column:{faf! + 1}">FAF {faf}</div>
+    {:else if endLabel === 'total'}
+      <div class="tick small faf-label" style="grid-column:{total + 1}">Total {total}</div>
     {/if}
 
     {#each lanes as lane, i}

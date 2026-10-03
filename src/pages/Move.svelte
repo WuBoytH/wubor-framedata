@@ -76,8 +76,12 @@
     <div class="stats">
       <div class="stat"><div class="k">Startup</div><div class="v">{sum.startup ?? '—'}</div></div>
       <div class="stat"><div class="k">Active</div><div class="v small-v mono">{sum.active.length ? fmtSpans(sum.active) : '—'}</div></div>
-      <div class="stat"><div class="k">FAF</div><div class="v">{sum.faf ?? '—'}</div>{#if v.faf_source === 'motion_end'}<div class="small faint">animation end</div>{/if}</div>
-      <div class="stat"><div class="k">Total</div><div class="v">{sum.total === null ? '—' : fmtNum(sum.total)}</div></div>
+      {#if sum.faf === null && sum.total !== null}
+        <div class="stat"><div class="k">Total Frames</div><div class="v">{fmtNum(sum.total)}</div><div class="small faint">no cancel frame</div></div>
+      {:else}
+        <div class="stat"><div class="k">FAF</div><div class="v">{sum.faf ?? '—'}</div></div>
+        <div class="stat"><div class="k">Total</div><div class="v">{sum.total === null ? '—' : fmtNum(sum.total)}</div></div>
+      {/if}
       <div class="stat"><div class="k">Damage</div><div class="v small-v mono">{sum.damage.length ? sum.damage.map(fmtNum).join(' / ') : '—'}</div></div>
       {#if landing}<div class="stat"><div class="k">Landing lag</div><div class="v">{landing.lag}</div>{#if landing.shoot !== null}<div class="small faint">+{landing.shoot} with Bullet Arts</div>{/if}</div>{/if}
       {#if v.autocancel.length}<div class="stat"><div class="k">Autocancel</div><div class="v small-v mono">{fmtSpans(v.autocancel)}</div></div>{/if}
