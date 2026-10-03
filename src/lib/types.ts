@@ -81,7 +81,10 @@ export interface Event {
 
 export interface Variant {
   label: string
+  /** conditions shared by every world merged into this variant */
   conditions: Condition[]
+  /** each merged world's full condition set; absent for a single world */
+  worlds?: Condition[][]
   notes: string[]
   total_frames?: number
   faf?: number

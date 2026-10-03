@@ -88,7 +88,9 @@
       {#if s.motion && s.motion.xlu_end > 0}<div class="stat"><div class="k">Intangible</div><div class="v small-v mono">{s.motion.xlu_start}–{s.motion.xlu_end}</div></div>{/if}
     </div>
 
-    {#if v.conditions.length}
+    {#if v.worlds?.length}
+      <p class="small muted">Assuming any of: {#each v.worlds as w, j}{j ? '; ' : ''}{#each w as c, i}{i ? ', ' : ''}<code>{c.value ? '' : '!'}{c.text}</code>{/each}{/each}</p>
+    {:else if v.conditions.length}
       <p class="small muted">Assuming: {#each v.conditions as c, i}{i ? ', ' : ''}<code>{c.value ? '' : '!'}{c.text}</code>{/each}</p>
     {/if}
 
