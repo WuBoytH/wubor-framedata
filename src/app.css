@@ -1,0 +1,92 @@
+:root {
+  color-scheme: light;
+  --bg: #fcfcfb;
+  --surface: #ffffff;
+  --surface-2: #f3f3f0;
+  --text: #0b0b0b;
+  --text-2: #52514e;
+  --text-3: #8a8985;
+  --border: #e4e3df;
+  --accent: #2a78d6;
+  --mod: #eb6834;
+  --hl: #fdeadf;   /* changed-param row tint */
+  /* frame-strip roles (validated categorical slots, light) */
+  --c-active: #e34948;
+  --c-autocancel: #1baf7a;
+  --c-cancel: #2a78d6;
+  --c-intangible: #eda100;
+  --c-idle: #d9d8d3;
+  --c-actionable: #ecebe7;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #1a1a19;
+    --surface: #222221;
+    --surface-2: #2a2a28;
+    --text: #ffffff;
+    --text-2: #c3c2b7;
+    --text-3: #8d8c85;
+    --border: #383835;
+    --accent: #3987e5;
+    --mod: #e8773f;
+    --hl: #3a2a20;
+    --c-active: #e66767;
+    --c-autocancel: #199e70;
+    --c-cancel: #3987e5;
+    --c-intangible: #c98500;
+    --c-idle: #3b3b38;
+    --c-actionable: #2e2e2b;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 var(--sans); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5rem; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; margin-top: 1.75rem; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+.muted { color: var(--text-2); }
+.faint { color: var(--text-3); }
+.small { font-size: .85rem; }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 1rem 1.25rem 4rem; }
+
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-weight: 600; color: var(--text-2); font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+td.num, th.num { text-align: right; }
+tbody tr:hover { background: var(--surface-2); }
+.table-wrap { overflow-x: auto; }
+
+.badge { display: inline-block; font-size: .7rem; font-weight: 600; padding: .05rem .4rem; border-radius: 4px; vertical-align: middle; text-transform: uppercase; letter-spacing: .04em; }
+.badge.mod { background: var(--mod); color: #fff; }
+.badge.soft { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: .1rem .6rem; font-size: .85rem; white-space: nowrap; }
+.chip b { font-weight: 600; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .75rem 1rem; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .5rem; margin: 1rem 0; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .75rem; }
+.stat .k { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-2); }
+.stat .v { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+button, .btn { font: inherit; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: .3rem .7rem; cursor: pointer; }
+button:hover { background: var(--surface-2); }
+button.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+
+input[type='search'] { font: inherit; padding: .45rem .7rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); width: 100%; max-width: 420px; }
+
+details > summary { cursor: pointer; color: var(--text-2); }
+.crumbs { font-size: .9rem; color: var(--text-2); margin-bottom: .5rem; }
+.crumbs > * + *::before { content: ' / '; color: var(--text-3); }
+.note { border-left: 3px solid var(--border); padding: .2rem .75rem; color: var(--text-2); margin: .3rem 0; }
+.warn { border-left-color: var(--c-intangible); }
