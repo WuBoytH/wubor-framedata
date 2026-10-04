@@ -12,6 +12,8 @@
   --hl: #fdeadf;   /* changed-param row tint */
   /* frame-strip roles (validated categorical slots, light) */
   --c-active: #e34948;
+  --c-grab: #4fb5d1;
+  --c-search: #b39a1a;
   --c-autocancel: #1baf7a;
   --c-cancel: #2a78d6;
   --c-intangible: #eda100;
@@ -34,9 +36,11 @@
     --mod: #e8773f;
     --hl: #3a2a20;
     --c-active: #e66767;
+    --c-grab: #4fb5d1;
+    --c-search: #b39a1a;
     --c-autocancel: #199e70;
     --c-cancel: #3987e5;
-    --c-intangible: #c98500;
+    --c-intangible: #fff5e1;
     --c-idle: #3b3b38;
     --c-actionable: #2e2e2b;
   }

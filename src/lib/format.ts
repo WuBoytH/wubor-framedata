@@ -1,4 +1,4 @@
-import type { Span, Val, Variant, Script, HitboxWindow } from './types'
+import type { Span, Val, Variant, Script, BoxWindow } from './types'
 
 export function fmtSpan(w: Span): string {
   if (w.end === null) return `${w.start}+`
@@ -23,7 +23,7 @@ const PREFIXES = [
   'ATTACK_LR_CHECK_', 'ATTACK_SETOFF_KIND_', 'ATTACK_SOUND_LEVEL_', 'COLLISION_SOUND_ATTR_',
   'ATTACK_REGION_', 'collision_attr_', 'FIGHTER_STATUS_TRANSITION_TERM_ID_CONT_',
   'FIGHTER_STATUS_TRANSITION_TERM_ID_', 'FIGHTER_STATUS_KIND_', 'FIGHTER_STATUS_ATTACK_AIR_FLAG_',
-  'FIGHTER_STATUS_ATTACK_FLAG_',
+  'FIGHTER_STATUS_ATTACK_FLAG_', 'COLLISION_KIND_MASK_', 'HIT_STATUS_MASK_',
 ]
 export function short(s: string): string {
   for (const p of PREFIXES) if (s.startsWith(p)) return s.slice(p.length)
@@ -40,7 +40,7 @@ export function fmtVal(v: Val, shorten = true): string {
   return `{${v.expr}}`
 }
 
-/** Field accessor for positional hitboxes. */
+/** Field accessor for positional boxes (hitbox / grab / search). */
 export function hitboxField(fields: string[]) {
   const idx = new Map(fields.map((f, i) => [f, i]))
   return (hb: Val[], name: string): Val => hb[idx.get(name) ?? -1] ?? null
@@ -72,21 +72,23 @@ export interface Summary {
 export function summarize(v: Variant, fields: string[]): Summary {
   const get = hitboxField(fields)
   const dmg = new Set<number>()
-  for (const w of v.windows) for (const h of w.hitboxes) {
+  for (const w of v.windows) for (const h of w.boxes) {
     const d = get(h, 'damage')
     if (typeof d === 'number') dmg.add(d)
   }
-  const starts = v.windows.map((w) => w.start)
+  // Grabs count as the move connecting; search boxes only look.
+  const connecting = [...v.windows, ...v.grabs]
+  const starts = connecting.map((w) => w.start)
   return {
     startup: starts.length ? Math.min(...starts) : null,
-    active: mergeSpans(v.windows),
+    active: mergeSpans(connecting),
     damage: [...dmg].sort((a, b) => b - a),
     // A FAF only exists when the script sets a cancel frame; `motion_end` means
     // the compiler synthesised anim_end + 1, which is just the total in disguise.
     faf: v.faf_source === 'motion_end' ? null : v.faf ?? null,
     total: v.total_frames ?? null,
     autocancel: v.autocancel,
-    hitboxes: v.windows.reduce((n, w) => n + w.hitboxes.length, 0),
+    hitboxes: v.windows.reduce((n, w) => n + w.boxes.length, 0),
   }
 }
 
@@ -114,22 +116,23 @@ export function landingLag(table: Record<string, number>, script: string): Landi
   return { lag, key, shoot: table[`${dir}_shoot`] ?? null }
 }
 
-export const hasHitboxes = (s: Script) => s.variants.some((v) => v.windows.length > 0)
+/** Any hitbox, grab box or search box in any variant. */
+export const hasHitboxes = (s: Script) => s.variants.some((v) => v.windows.length > 0 || v.grabs.length > 0 || v.searches.length > 0)
 
-/** Windows with the same span merged into one (hitboxes concatenated), in start order. */
-export function groupWindows(windows: HitboxWindow[]): HitboxWindow[] {
-  const out: HitboxWindow[] = []
+/** Windows with the same span merged into one (boxes concatenated), in start order. */
+export function groupWindows(windows: BoxWindow[]): BoxWindow[] {
+  const out: BoxWindow[] = []
   for (const w of windows) {
     const g = out.find((o) => o.start === w.start && o.end === w.end)
     if (g) {
-      g.hitboxes = [...g.hitboxes, ...w.hitboxes]
+      g.boxes = [...g.boxes, ...w.boxes]
       g.tags = [...new Set([...g.tags, ...w.tags])]
     } else out.push({ ...w })
   }
   return out.sort((a, b) => a.start - b.start)
 }
 
-export const windowIds = (w: HitboxWindow, fields: string[]) => {
+export const windowIds = (w: BoxWindow, fields: string[]) => {
   const get = hitboxField(fields)
-  return [...new Set(w.hitboxes.map((h) => fmtVal(get(h, 'id'))))].join(', ')
+  return [...new Set(w.boxes.map((h) => fmtVal(get(h, 'id'))))].join(', ')
 }

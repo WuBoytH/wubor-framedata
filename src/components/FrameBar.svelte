@@ -1,14 +1,16 @@
 <script lang="ts">
   // Frame strip: one lane per thing that's active on a span of game frames.
-  // Colour marks identity (hitbox / autocancel / cancel / intangible) and every
-  // lane also carries a text label, so colour is never the only encoding.
-  import type { Variant, Motion } from '../lib/types'
+  // Colour marks identity (hitbox / grab / search / autocancel / cancel /
+  // intangible) and every lane also carries a text label, so colour is never
+  // the only encoding.
+  import type { Variant, Motion, Index, BoxWindow } from '../lib/types'
   import { fmtSpan, windowIds, short, groupWindows } from '../lib/format'
 
-  let { variant, motion, fields }: { variant: Variant; motion: Motion | null; fields: string[] } = $props()
+  let { variant, motion, idx }: { variant: Variant; motion: Motion | null; idx: Index } = $props()
 
   interface Seg { start: number; end: number; title: string }
-  interface Lane { label: string; role: 'active' | 'autocancel' | 'cancel' | 'intangible'; segs: Seg[] }
+  type Role = 'active' | 'grab' | 'search' | 'autocancel' | 'cancel' | 'intangible'
+  interface Lane { label: string; role: Role; segs: Seg[] }
 
   // No cancel frame → the "FAF" is just anim end + 1, so the strip ends at the
   // animation and is labelled Total instead.
@@ -17,7 +19,7 @@
     const ends = [
       Math.ceil(variant.total_frames ?? 0),
       faf ?? 0,
-      ...variant.windows.map((w) => w.end ?? w.start),
+      ...[...variant.windows, ...variant.grabs, ...variant.searches].map((w) => w.end ?? w.start),
       ...variant.autocancel.map((w) => w.end ?? w.start),
       ...variant.cancels.map((c) => c.window.end ?? c.window.start),
     ]
@@ -27,15 +29,21 @@
   const lanes = $derived.by((): Lane[] => {
     const out: Lane[] = []
     const clip = (end: number | null) => Math.min(end ?? total, total)
-    const windows = groupWindows(variant.windows)
-    windows.forEach((w) => {
-      const ids = windowIds(w, fields)
-      out.push({
-        label: windows.length > 1 ? `Hitbox ${ids}` : 'Hitboxes',
-        role: 'active',
-        segs: [{ start: w.start, end: clip(w.end), title: `Hitbox id ${ids} active f${fmtSpan(w)}${w.tags.length ? ` [${w.tags.join(', ')}]` : ''}` }],
-      })
-    })
+    // One lane per window; the label only carries ids when there's more than one.
+    const boxLanes = (ws: BoxWindow[], fields: string[], role: Role, one: string, many: string) => {
+      const windows = groupWindows(ws)
+      for (const w of windows) {
+        const ids = windowIds(w, fields)
+        out.push({
+          label: windows.length > 1 ? `${one} ${ids}` : many,
+          role,
+          segs: [{ start: w.start, end: clip(w.end), title: `${one} id ${ids} active f${fmtSpan(w)}${w.tags.length ? ` [${w.tags.join(', ')}]` : ''}` }],
+        })
+      }
+    }
+    boxLanes(variant.windows, idx.hitbox_fields, 'active', 'Hitbox', 'Hitboxes')
+    boxLanes(variant.grabs, idx.grab_fields, 'grab', 'Grabbox', 'Grabbox')
+    boxLanes(variant.searches, idx.search_fields, 'search', 'Searchbox', 'Searchbox')
     if (variant.autocancel.length) {
       out.push({ label: 'Autocancel', role: 'autocancel', segs: variant.autocancel.map((w) => ({ start: w.start, end: clip(w.end), title: `Autocancel f${fmtSpan(w)}` })) })
     }
@@ -98,7 +106,7 @@
     {/each}
   </div>
   {#if !lanes.length}
-    <p class="small muted">No hitboxes in this script{motion ? '' : ' and no motion entry'}. Projectile and article hitboxes live on their own agent (see the fighter page's Articles section).</p>
+    <p class="small muted">No hitboxes, grab boxes or search boxes in this script{motion ? '' : ' and no motion entry'}. Projectile and article hitboxes live on their own agent (see the fighter page's Articles section).</p>
   {/if}
   {#if hover !== null}
     {@const items = atFrame(hover)}
@@ -128,6 +136,8 @@
   .actionable { background: var(--c-actionable); border-radius: 0 3px 3px 0; }
   .seg { border-radius: 4px; margin: 0 1px; box-shadow: 0 0 0 1px var(--bg); z-index: 1; }
   .seg.active { background: var(--c-active); }
+  .seg.grab { background: var(--c-grab); }
+  .seg.search { background: var(--c-search); }
   .seg.autocancel { background: var(--c-autocancel); }
   .seg.cancel { background: var(--c-cancel); }
   .seg.intangible { background: var(--c-intangible); }

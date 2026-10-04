@@ -13,7 +13,7 @@ cargo run -q -- build   # (re)build data/{wubor,vanilla}/<fighter>.json from the
 cargo run -q -- site    # re-encode into ../wubor-framedata-site/public/data (path: `site_out` in wubor-framedata.toml)
 ```
 
-Layout: `index.json` (fighter list, hitbox field order, generation date) and
+Layout: `index.json` (fighter list, hitbox/grab/search box field order, generation date) and
 `{wubor,vanilla}/<fighter>.json`. The format is described in `src/lib/types.ts`.
 
 ## Develop
@@ -59,8 +59,9 @@ direct link.
 * **Home** — fighter grid with search and per-fighter modded-script counts.
 * **Fighter** — moves by category with startup, active frames, FAF, total, damage,
   landing lag and autocancel for aerials; articles; the mod's param changes.
-* **Move** — frame strip (hitboxes, autocancel, cancel windows, intangibility,
-  FAF), per-window hitbox tables, cancels, notes, and the raw script events.
+* **Move** — frame strip (hitboxes, grab boxes, search boxes, autocancel,
+  cancel windows, intangibility, FAF), per-window hitbox / grab box / search
+  box tables, cancels, notes, and the raw script events.
   Scripts with runtime branches show one tab per variant.
 * **Cancels** — the fighter's custom-cancel rules and every cancel window they
   produce.

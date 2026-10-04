@@ -7,6 +7,7 @@
   import { summarize, fmtSpan, fmtSpans, fmtFrame, fmtNum, fmtVal, short, windowIds, groupWindows, landingLag } from '../lib/format'
   import FrameBar from '../components/FrameBar.svelte'
   import HitboxTable from '../components/HitboxTable.svelte'
+  import BoxTable from '../components/BoxTable.svelte'
   import { orderVariants } from '../lib/variants'
 
   let { idx, id, agent, script }: { idx: Index; id: string; agent: string; script: string } = $props()
@@ -20,15 +21,18 @@
     const args = (e.args ?? []).map((a) => fmtVal(a, false)).join(', ')
     switch (e.kind) {
       case 'Attack': return `ATTACK id ${fmtVal(e.id ?? null)}`
+      case 'Catch': return `CATCH id ${fmtVal(e.id ?? null)}`
+      case 'Search': return `SEARCH id ${fmtVal(e.id ?? null)}`
       case 'Call': return `${e.name}(${args})`
-      case 'ClearAll': return 'clear all hitboxes'
-      case 'Clear': return `clear hitbox id ${fmtVal(e.id ?? null)}`
+      case 'ClearAll': return `clear all ${boxName(e)}es`
+      case 'Clear': return `clear ${boxName(e)} id ${fmtVal(e.id ?? null)}`
       case 'HitboxModify': return `${e.command} id ${fmtVal(e.id ?? null)} (${args})`
       case 'MotionRate': return `motion rate → ${e.rate}`
       case 'Flag': return `flag ${short(e.name ?? '')}`
       case 'Unsupported': return `unsupported: ${e.text}`
     }
   }
+  const boxName = (e: Event) => ({ attack: 'hitbox', grab: 'grab box', search: 'search box' })[e.boxes ?? 'attack']
 </script>
 
 <div class="crumbs">
@@ -95,13 +99,29 @@
     {/if}
 
     <h2>Frames</h2>
-    <FrameBar variant={v} motion={s.motion} fields={idx.hitbox_fields} />
+    <FrameBar variant={v} motion={s.motion} {idx} />
 
     {#if v.windows.length}
       <h2>Hitboxes</h2>
       {#each groupWindows(v.windows) as w}
         <h3>Frames {fmtSpan(w)} <span class="muted small">id {windowIds(w, idx.hitbox_fields)}{w.tags.length ? ` · ${w.tags.join(', ')}` : ''}</span></h3>
-        <HitboxTable hitboxes={w.hitboxes} fields={idx.hitbox_fields} />
+        <HitboxTable hitboxes={w.boxes} fields={idx.hitbox_fields} />
+      {/each}
+    {/if}
+
+    {#if v.grabs.length}
+      <h2>Grabboxes</h2>
+      {#each groupWindows(v.grabs) as w}
+        <h3>Frames {fmtSpan(w)} <span class="muted small">id {windowIds(w, idx.grab_fields)}{w.tags.length ? ` · ${w.tags.join(', ')}` : ''}</span></h3>
+        <BoxTable boxes={w.boxes} fields={idx.grab_fields} />
+      {/each}
+    {/if}
+
+    {#if v.searches.length}
+      <h2>Searchboxes</h2>
+      {#each groupWindows(v.searches) as w}
+        <h3>Frames {fmtSpan(w)} <span class="muted small">id {windowIds(w, idx.search_fields)}{w.tags.length ? ` · ${w.tags.join(', ')}` : ''}</span></h3>
+        <BoxTable boxes={w.boxes} fields={idx.search_fields} />
       {/each}
     {/if}
 
@@ -153,6 +173,8 @@
   .variants { margin: .5rem 0; }
   .small-v { font-size: 1rem; }
   tr.attack td { color: var(--c-active); }
+  tr.catch td { color: var(--c-grab); }
+  tr.search td { color: var(--c-search); }
   tr.motionrate td { font-style: italic; }
   .badge { margin-left: .4rem; }
 </style>

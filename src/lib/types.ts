@@ -48,14 +48,20 @@ export interface CancelRule {
   source: string
 }
 
-export interface HitboxWindow extends Span {
+/** A span of frames with a set of collision boxes active: hitboxes (`ATTACK`),
+ *  grab boxes (`CATCH`) or search boxes (`SEARCH`). */
+export interface BoxWindow extends Span {
   tags: string[]
-  /** Positional; field order is `Index.hitbox_fields`. */
-  hitboxes: Val[][]
+  /** Positional; field order is `Index.hitbox_fields` / `grab_fields` / `search_fields`. */
+  boxes: Val[][]
 }
+
+export type BoxKind = 'attack' | 'grab' | 'search'
 
 export type EventKind =
   | 'Attack'
+  | 'Catch'
+  | 'Search'
   | 'Call'
   | 'ClearAll'
   | 'Clear'
@@ -72,6 +78,8 @@ export interface Event {
   tags?: string[]
   kind: EventKind
   id?: Val
+  /** ClearAll / Clear: which boxes */
+  boxes?: BoxKind
   name?: string
   args?: Val[]
   command?: string
@@ -91,7 +99,12 @@ export interface Variant {
   faf_source?: 'cancel_frame' | 'motion_end'
   autocancel: Span[]
   cancels: CancelWindow[]
-  windows: HitboxWindow[]
+  /** hitboxes */
+  windows: BoxWindow[]
+  /** grab boxes */
+  grabs: BoxWindow[]
+  /** search boxes */
+  searches: BoxWindow[]
   events: Event[]
 }
 
@@ -153,6 +166,8 @@ export interface IndexEntry {
 export interface Index {
   generated: string
   hitbox_fields: string[]
+  grab_fields: string[]
+  search_fields: string[]
   wubor: IndexEntry[]
   vanilla?: IndexEntry[]
 }
