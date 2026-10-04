@@ -9,14 +9,24 @@
 // A variant the interpreter merged from several worlds (same frame data under
 // each) is labelled by its "simplest" world — unmodified if any world is —
 // with the other worlds' labels listed after a `/`.
+//
+// src/data/rename.ts and src/data/order.ts can rename labels and pin an order
+// per fighter and script; `orderVariants` applies it when given the fighter/agent/script.
 import type { Condition, Variant } from './types'
+import { VARIANT_NAMES } from '../data/rename'
+import { VARIANT_ORDER } from '../data/order'
+import { scriptKey } from './moves'
 
 export interface VariantView {
   /** index into `script.variants` */
   index: number
   variant: Variant
-  /** '' for the unmodified move */
+  /** '' for the unmodified move; renamed by src/data/rename.ts if listed there */
   label: string
+  /** label before any rename — the key to use in src/data/rename.ts / order.ts */
+  auto: string
+  /** label came from src/data/rename.ts (it's prose, not condition text) */
+  renamed: boolean
   /** 0 Light, 1 Medium, 2 Heavy; null = no strength conditions */
   strength: number | null
   /** every strength value tested and all false — the branch can't run */
@@ -94,24 +104,64 @@ const simpler = (a: WorldView, b: WorldView) => (a.strength ?? 9) - (b.strength 
 
 function view(variant: Variant, index: number): VariantView {
   const worlds = (variant.worlds?.length ? variant.worlds : [variant.conditions]).map(world).filter((w) => !w.unreachable)
-  if (!worlds.length) return { index, variant, label: '', strength: null, modifiers: [], unreachable: true }
+  if (!worlds.length) return { index, variant, label: '', auto: '', renamed: false, strength: null, modifiers: [], unreachable: true }
   const primary = worlds.reduce((a, b) => (simpler(b, a) < 0 ? b : a))
   const label = primary.label ? [...new Set(worlds.map((w) => w.label))].join(' / ') : ''
-  return { index, variant, label, strength: primary.strength, modifiers: primary.modifiers, unreachable: false }
+  return { index, variant, label, auto: label, renamed: false, strength: primary.strength, modifiers: primary.modifiers, unreachable: false }
+}
+
+/** The override tables that apply to a script, most specific first. */
+function overrides<T>(table: Record<string, Record<string, T>>, fighter: string, key: string): T[] {
+  return [table[fighter]?.[key], table[fighter]?.['*'], table['*']?.[key], table['*']?.['*']].filter((t): t is T => t !== undefined)
+}
+
+/** Rename a label: whole label first, then each ` / ` world, then each ` · ` part. */
+function rename(label: string, names: Record<string, string>[]): string | undefined {
+  const exact = (s: string) => names.find((n) => s in n)?.[s]
+  const whole = exact(label)
+  if (whole !== undefined) return whole
+  let hit = false
+  const out = label
+    .split(' / ')
+    .map((w) => {
+      const ww = exact(w)
+      if (ww !== undefined) { hit = true; return ww }
+      return w
+        .split(' · ')
+        .map((p) => {
+          const pp = exact(p)
+          if (pp !== undefined) hit = true
+          return pp ?? p
+        })
+        .join(' · ')
+    })
+    .join(' / ')
+  return hit ? out : undefined
 }
 
 /**
  * Variants in display order, unreachable ones dropped. A script with a single
- * unconditional variant gives one view with label ''.
+ * unconditional variant gives one view with label ''. Pass the fighter, agent
+ * and script to apply the renames and manual order in src/data/rename.ts / order.ts.
  */
-export function orderVariants(variants: Variant[]): VariantView[] {
-  return variants
-    .map(view)
-    .filter((v) => !v.unreachable)
-    .sort(
-      (a, b) =>
-        (a.strength ?? 9) - (b.strength ?? 9) ||
-        a.modifiers.length - b.modifiers.length ||
-        a.index - b.index,
-    )
+export function orderVariants(variants: Variant[], fighter?: string, agent?: string, script?: string): VariantView[] {
+  const views = variants.map(view).filter((v) => !v.unreachable)
+  const names = fighter && script ? overrides(VARIANT_NAMES, fighter, scriptKey(fighter, agent, script)) : []
+  const order = fighter && script ? overrides(VARIANT_ORDER, fighter, scriptKey(fighter, agent, script))[0] ?? [] : []
+  for (const v of views) {
+    const n = rename(v.auto, names)
+    if (n !== undefined) { v.label = n; v.renamed = true }
+  }
+  // Manual position by automatic or renamed label; unlisted variants sort after.
+  const pos = (v: VariantView) => {
+    const i = [v.auto, v.label].map((l) => order.indexOf(l)).filter((i) => i >= 0)
+    return i.length ? Math.min(...i) : order.length
+  }
+  return views.sort(
+    (a, b) =>
+      pos(a) - pos(b) ||
+      (a.strength ?? 9) - (b.strength ?? 9) ||
+      a.modifiers.length - b.modifiers.length ||
+      a.index - b.index,
+  )
 }

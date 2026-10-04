@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Index, Fighter, CancelSpec } from '../lib/types'
   import { loadFighter } from '../lib/data'
-  import { fighterName } from '../lib/fighters'
+  import { fighterName, mainAgent } from '../lib/fighters'
   import { href } from '../lib/router.svelte'
   import { moveInfo } from '../lib/moves'
   import { short, fmtSpan } from '../lib/format'
@@ -9,6 +9,7 @@
   import { moveVisible } from '../lib/visibility'
 
   let { idx, id }: { idx: Index; id: string } = $props()
+  const main = $derived(mainAgent(id))
   const data = $derived(loadFighter('wubor', id))
 
   const on = (s: CancelSpec) => (s.on.length ? s.on.join(' / ') : 'always')
@@ -16,13 +17,13 @@
   /** Every cancel window across the fighter's own scripts, flattened. */
   function windows(f: Fighter) {
     const out = []
-    for (const [name, s] of Object.entries(f.agents[id] ?? {})) {
-      if (!moveVisible(id, id, name)) continue
+    for (const [name, s] of Object.entries(f.agents[main] ?? {})) {
+      if (!moveVisible(id, main, name)) continue
       for (const { variant: v, label } of orderVariants(s.variants)) for (const c of v.cancels) {
-        out.push({ name, move: moveInfo(name, id, id).name, variant: s.variants.length > 1 ? label || 'unmodified' : '', c })
+        out.push({ name, move: moveInfo(name, id, main).name, variant: s.variants.length > 1 ? label || 'unmodified' : '', c })
       }
     }
-    return out.sort((a, b) => moveInfo(a.name, id, id).order.localeCompare(moveInfo(b.name, id, id).order) || a.name.localeCompare(b.name))
+    return out.sort((a, b) => moveInfo(a.name, id, main).order.localeCompare(moveInfo(b.name, id, main).order) || a.name.localeCompare(b.name))
   }
 </script>
 
@@ -80,7 +81,7 @@
       <tbody>
         {#each ws as w}
           <tr>
-            <td><a href={href.move(id, id, w.name)}>{w.move}</a>{#if w.variant}<div class="small mono muted">{w.variant}</div>{/if}</td>
+            <td><a href={href.move(id, main, w.name)}>{w.move}</a>{#if w.variant}<div class="small mono muted">{w.variant}</div>{/if}</td>
             <td>{w.c.kind.replace('_', ' ')}{w.c.alt_flag ? ` (alt: ${short(w.c.alt_flag)})` : ''}</td>
             <td>{w.c.on.length ? w.c.on.join(' / ') : 'always'}</td>
             <td class="mono">f{fmtSpan(w.c.window)}</td>

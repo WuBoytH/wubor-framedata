@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Index, Event } from '../lib/types'
   import { loadFighter } from '../lib/data'
-  import { fighterName, agentLabel } from '../lib/fighters'
+  import { fighterName, agentLabel, mainAgent } from '../lib/fighters'
   import { href } from '../lib/router.svelte'
   import { moveInfo } from '../lib/moves'
   import { summarize, fmtSpan, fmtSpans, fmtFrame, fmtNum, fmtVal, short, windowIds, groupWindows, landingLag } from '../lib/format'
@@ -33,7 +33,7 @@
 
 <div class="crumbs">
   <a href={href.home}>Fighters</a><a href={href.fighter(id)}>{fighterName(id)}</a>
-  {#if agent !== id}<span class="mono">{agentLabel(agent, id)}</span>{/if}
+  {#if agent !== mainAgent(id)}<span class="mono">{agentLabel(agent, id)}</span>{/if}
   <span>{info.name}</span>
 </div>
 
@@ -45,7 +45,7 @@
     <h1>{info.name}</h1>
     <p class="note warn">No script <code>{script}</code> on agent <code>{agent}</code>.</p>
   {:else}
-    {@const views = orderVariants(s.variants)}
+    {@const views = orderVariants(s.variants, id, agent, script)}
     {@const v = views[Math.min(vi, views.length - 1)].variant}
     {@const sum = summarize(v, idx.hitbox_fields)}
     {@const landing = landingLag(f.landing_lag, script)}
@@ -68,7 +68,7 @@
       <div class="row variants">
         <span class="small muted">Variant</span>
         {#each views as sv, i}
-          <button class="small" class:mono={!!sv.label} class:on={i === vi} onclick={() => (vi = i)}>{sv.label || 'Unmodified'}</button>
+          <button class="small" class:mono={!!sv.label && !sv.renamed} class:on={i === vi} onclick={() => (vi = i)}>{sv.label || 'Base'}</button>
         {/each}
       </div>
     {/if}

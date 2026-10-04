@@ -1,4 +1,4 @@
-import { ARTICLE_NAMES } from '../data/article-names'
+import { ARTICLE_NAMES } from '../data/rename'
 
 /** Internal fighter directory name → display name. */
 const NAMES: Record<string, string> = {
@@ -29,13 +29,28 @@ const NAMES: Record<string, string> = {
 export const fighterName = (id: string) => NAMES[id] ?? id
 
 /**
+ * Fighters whose data lives on an agent with a different name. That agent's
+ * scripts are shown as the fighter's own moves (not as an article) and its
+ * name is the prefix stripped from article names; override tables key its
+ * scripts plainly (`game_specialn`, not `popo/game_specialn`).
+ */
+const MAIN_AGENT: Record<string, string> = {
+  iceclimber: 'popo',
+}
+
+/** The agent holding a fighter's own moves — usually the fighter id itself. */
+export const mainAgent = (id: string) => MAIN_AGENT[id] ?? id
+
+/**
  * Article agent → display name: `ARTICLE_NAMES` if set, else the agent name
  * with the fighter prefix stripped (`mario_fireball` → `fireball`). The
  * fighter's own agent → ''.
  */
 export function agentLabel(agent: string, fighter: string) {
-  if (agent === fighter) return ''
+  const main = mainAgent(fighter)
+  if (agent === fighter || agent === main) return ''
   const named = ARTICLE_NAMES[fighter]?.[agent]
   if (named) return named
-  return agent.startsWith(fighter + '_') ? agent.slice(fighter.length + 1) : agent
+  for (const prefix of [fighter + '_', main + '_']) if (agent.startsWith(prefix)) return agent.slice(prefix.length)
+  return agent
 }

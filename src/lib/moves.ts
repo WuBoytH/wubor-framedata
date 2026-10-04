@@ -1,8 +1,9 @@
 // Script name (`game_attackairn`) → human move name and category.
-// Per-fighter names come from src/data/move-names.ts and win over the rules here.
+// Per-fighter names come from src/data/rename.ts and win over the rules here.
 
-import { MOVE_NAMES } from '../data/move-names'
-import { MOVE_ORDER } from '../data/move-order'
+import { MOVE_NAMES } from '../data/rename'
+import { MOVE_ORDER } from '../data/order'
+import { mainAgent } from './fighters'
 
 export type Category =
   | 'Ground Normals'
@@ -11,10 +12,11 @@ export type Category =
   | 'Grabs & Throws'
   | 'Specials'
   | 'Dodges & Ledge'
+  | 'System'
   | 'Other'
 
 export const CATEGORIES: Category[] = [
-  'Ground Normals', 'Smash Attacks', 'Aerials', 'Grabs & Throws', 'Specials', 'Dodges & Ledge', 'Other',
+   'System', 'Ground Normals', 'Smash Attacks', 'Aerials', 'Grabs & Throws', 'Specials', 'Dodges & Ledge', 'Other',
 ]
 
 export interface MoveInfo {
@@ -108,17 +110,21 @@ const RULES: Rule[] = [
 
 const cache = new Map<string, MoveInfo>()
 
+/** Key for the hand-written override tables: `script`, or `agent/script` on an article. */
+export const scriptKey = (fighter: string, agent: string | undefined, script: string) =>
+  agent && agent !== fighter && agent !== mainAgent(fighter) ? `${agent}/${script}` : script
+
 /**
  * Name/category/order for a script. `fighter` and `agent` enable the
- * hand-written overrides (src/data/move-names.ts, src/data/move-order.ts).
+ * hand-written overrides (src/data/rename.ts, src/data/order.ts).
  */
 export function moveInfo(script: string, fighter?: string, agent?: string): MoveInfo {
   let info = ruleInfo(script)
   if (!fighter) return info
-  const k = agent && agent !== fighter ? `${agent}/${script}` : script
+  const k = scriptKey(fighter, agent, script)
   const o = MOVE_NAMES[fighter]?.[k] ?? MOVE_NAMES['*']?.[k]
   if (o !== undefined) {
-    info = typeof o === 'string' ? { ...info, name: o } : { ...info, name: o.name, category: o.category ?? info.category }
+    info = typeof o === 'string' ? { ...info, name: o } : { ...info, name: o.name ?? info.name, category: o.category ?? info.category }
   }
   // Manual order: fighter list first, then '*'; '!' sorts before every automatic key.
   const manual = [...(MOVE_ORDER[fighter] ?? []), ...(MOVE_ORDER['*'] ?? [])]

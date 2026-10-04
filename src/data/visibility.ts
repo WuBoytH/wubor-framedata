@@ -1,4 +1,6 @@
 // Hand-maintained include/exclude lists for what the fighter page shows.
+// Names live in src/data/rename.ts and ordering in src/data/order.ts
+// (PARAM_ORDER there reorders what the PARAMS include list lets through).
 //
 //   fighter id ('*' = every fighter)  →  { include?, exclude? }
 //
@@ -55,7 +57,8 @@ export const PARAMS: Record<string, Rules> = {
       'squat_walk_type',
       'wall_jump_type',
       'attack_wall_type',
-      'air_lasso_type'
+      'air_lasso_type',
+      'air_dash_tier'
     ],
     exclude: [
       'fighter_kind'
@@ -69,6 +72,19 @@ export const MOVES: Record<string, Rules> = {
   '*': {
     // e.g. exclude: ['game_appeal*', 'game_final*']
   },
+  eflame: {
+    exclude: [
+      'game_specialn1common',
+      'game_specialn2common',
+      'game_specialn3common',
+      'game_specialn4common',
+    ]
+  },
+  elight: {
+    exclude: [
+      'game_specialairnhit'
+    ]
+  },
   // e.g. samus: { exclude: ['game_specials', 'game_specialairs'] },
   ryu: {
     exclude: [
@@ -79,6 +95,8 @@ export const MOVES: Record<string, Rules> = {
       'game_attacknearw',
     ]
   },
+  // Ice Climbers: Popo's agent also carries Nana's copy of every move (`*_nana`).
+  // iceclimber: { exclude: ['game_*_nana'] },
 }
 
 export const ARTICLES: Record<string, Rules> = {
@@ -86,4 +104,8 @@ export const ARTICLES: Record<string, Rules> = {
     // e.g. exclude: ['*_final*'],
   },
   // e.g. mario: { exclude: ['mario_hugeflame'] },
+  // Ice Climbers: Popo is the fighter's own agent (src/lib/fighters.ts); Nana mirrors it.
+  eflame: { exclude: ['eflame_windummy'] },
+  elight: { exclude: ['elight_windummy'] },
+  iceclimber: { exclude: ['nana', 'nana_*'] },
 }

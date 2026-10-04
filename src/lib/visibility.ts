@@ -1,4 +1,5 @@
 import { ARTICLES, MOVES, PARAMS, type Pattern, type Rules } from '../data/visibility'
+import { scriptKey } from './moves'
 
 function matches(p: Pattern, key: string): boolean {
   if (p instanceof RegExp) return p.test(key)
@@ -17,7 +18,6 @@ function allowed(table: Record<string, Rules>, fighter: string, key: string): bo
 
 export const paramVisible = (fighter: string, key: string) => allowed(PARAMS, fighter, key)
 
-export const moveVisible = (fighter: string, agent: string, script: string) =>
-  allowed(MOVES, fighter, agent === fighter ? script : `${agent}/${script}`)
+export const moveVisible = (fighter: string, agent: string, script: string) => allowed(MOVES, fighter, scriptKey(fighter, agent, script))
 
 export const articleVisible = (fighter: string, agent: string) => allowed(ARTICLES, fighter, agent)
