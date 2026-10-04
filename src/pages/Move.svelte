@@ -68,10 +68,11 @@
     <h1>
       {info.name}
       {#if s.origin === 'modded'}<span class="badge mod">mod</span>{/if}
+      {#if s.origin === 'motion'}<span class="badge soft" title="no game_ script in the mod or vanilla; FAF and total frames come from motion_list">motion only</span>{/if}
       <span class="mono faint small">{script}</span>
     </h1>
     <p class="small muted mono">
-      {s.source}:{s.line}
+      {#if s.origin === 'motion'}no script{:else}{s.source}:{s.line}{/if}
       {#if s.motion}
         · {s.motion.animation}{#if s.motion.anim_frames} ({s.motion.anim_frames} anim frames){/if}
         {#if s.motion.motion_origin === 'modded'}<span class="badge mod">mod motion</span>{/if}

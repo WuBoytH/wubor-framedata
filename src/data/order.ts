@@ -16,6 +16,49 @@
 
 export const MOVE_ORDER: Record<string, string[]> = {
   '*': [],
+  demon: [
+    'game_attack11',
+    'game_attack12',
+    'game_flashpunch',
+    'game_attack13',
+    'game_attack14',
+    'game_attack15',
+    'game_attack16',
+    'game_attack17',
+    'game_attack18',
+    'game_attack19',
+    'game_attack110',
+    'game_attackdash',
+    'game_attacks3',
+    'game_attackstand5',
+    'game_attackstand4',
+    'game_attackhi3',
+    'game_attackhi32',
+
+    'game_specialnstart',
+    'game_specialn',
+    'game_specialnhi',
+    'game_specialnlw',
+    'game_specialairnstart',
+    'game_specialairn',
+    'game_specialairnhi',
+    'game_specialairnlw',
+
+    'game_specials',
+    'game_specialshit',
+    'game_specialsend',
+    'game_specialairs',
+    'game_specialairshit',
+    'game_specialairsend',
+    'game_specialslanding',
+
+    'game_specialhistart',
+    'game_specialairhistart',
+    'game_specialhi',
+
+    'game_speciallw',
+    'game_specialairlw'
+  ],
   eflame: [
     'game_specialnstart',
     'game_specialnhold',
@@ -34,6 +77,8 @@ export const MOVE_ORDER: Record<string, string[]> = {
     'game_specialsflick',
     'game_specialairs',
     'game_specialairsflick',
+    'game_specialscatch',
+    'game_specialairscatch',
 
     'game_specialhistart',
     'game_specialairhistart',
@@ -41,7 +86,11 @@ export const MOVE_ORDER: Record<string, string[]> = {
     'game_specialairhifall',
     'game_specialhi',
 
+    'game_speciallw',
+    'game_speciallwend',
     'game_speciallwattack',
+    'game_specialairlw',
+    'game_specialairlwend',
     'game_specialairlwattack',
   ],
   elight: [
@@ -68,7 +117,11 @@ export const MOVE_ORDER: Record<string, string[]> = {
     'game_specialairhi2',
     'game_specialairhiend',
 
+    'game_speciallw',
+    'game_speciallwend',
     'game_speciallwattack',
+    'game_specialairlw',
+    'game_specialairlwend',
     'game_specialairlwattack',
   ],
   ryu: [
@@ -91,6 +144,7 @@ export const MOVE_ORDER: Record<string, string[]> = {
     'game_specialairhicommand',
     'game_specialairhiend',
     'game_specialhifall',
+    'game_specialhilanding',
     'game_speciallw',
     'game_specialairlw',
     'game_speciallwrush',

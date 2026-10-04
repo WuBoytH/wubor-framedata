@@ -72,6 +72,23 @@ export const MOVES: Record<string, Rules> = {
   '*': {
     // e.g. exclude: ['game_appeal*', 'game_final*']
   },
+  demon: {
+    exclude: [
+      'game_attack100',
+      'game_attack100end',
+      'game_attack100sub',
+      'game_attack142',
+      'game_attacks3hi',
+      'game_attacks3lw',
+
+      'game_attacks4transform',
+      'game_attackhi4transform',
+      'game_attacklw4transform',
+
+      'game_specialhiair',
+      'game_specialhiground',
+    ]
+  },
   eflame: {
     exclude: [
       'game_specialn1common',
@@ -85,14 +102,32 @@ export const MOVES: Record<string, Rules> = {
       'game_specialairnhit'
     ]
   },
+  mario: {
+    exclude: [
+      'game_attacks4hi',
+      'game_attacks4lw',
+      'game_speciallwhold',
+      'game_speciallwheavy',
+      'game_speciallwlight',
+      'game_specialairlwhold',
+      'game_specialairlwheavy',
+      'game_specialairlwlight',
+    ]
+  },
   // e.g. samus: { exclude: ['game_specials', 'game_specialairs'] },
   ryu: {
     exclude: [
+      'game_attack11nears',
       'game_speciallwstepf',
       'game_speciallwstepb',
       'game_speciallwturn',
       'game_specialairlwturn',
       'game_attacknearw',
+
+      'game_speciallwstart',
+      'game_specialairlwstart',
+      'game_specialairlwstepf',
+      'game_specialairlwstepb',
     ]
   },
   // Ice Climbers: Popo's agent also carries Nana's copy of every move (`*_nana`).
@@ -108,4 +143,5 @@ export const ARTICLES: Record<string, Rules> = {
   eflame: { exclude: ['eflame_windummy'] },
   elight: { exclude: ['elight_windummy'] },
   iceclimber: { exclude: ['nana', 'nana_*'] },
+  mario: { exclude: ['mario_pumpwater'] }
 }

@@ -29,7 +29,39 @@ export const MOVE_NAMES: Record<string, Record<string, NameOverride>> = {
     game_escapeairslide: { name: 'Air Dash', category: 'System' },
     game_guardcancelattack: { name: 'Guard Cancel Attack', category: 'System' },
   },
+  demon: {
+    game_flashpunch: { name: 'Flashing Mach Punch', category: 'Ground Normals' },
+    game_attack110: 'Jab 10',
+    game_attackstand5: { name: 'Forward Tilt (Up Angled)', category: 'Ground Normals' },
+    game_attackstand4: { name: 'Forward Tilt (Down Angled)', category: 'Ground Normals' },
 
+    game_specialnstart: 'Devil Blaster (Startup)',
+    game_specialn: 'Devil Blaster (Fire)',
+    game_specialnhi: 'Devil Blaster (Fire) (Hi)',
+    game_specialnlw: 'Devil Blaster (Fire) (Lw)',
+    game_specialairnstart: 'Devil Blaster (Startup) (Air)',
+    game_specialairn: 'Devil Blaster (Fire) (Air)',
+    game_specialairnhi: 'Devil Blaster (Fire) (Hi) (Air)',
+    game_specialairnlw: 'Devil Blaster (Fire) (Lw) (Air)',
+
+    game_specials: 'Devil Fist',
+    game_specialshit: 'Devil Fist (Hit)',
+    game_specialsend: 'Devil Fist (End)',
+    game_specialslanding: 'Devil Fist (Landing)',
+    game_specialairs: 'Devil Fist (Air)',
+    game_specialairshit: 'Devil Fist (Hit) (Air)',
+    game_specialairsend: 'Devil Fist (End) (Air)',
+
+    game_specialhistart: 'Devil Wings (Startup)',
+    game_specialhi: 'Devil Wings (Jump)',
+    game_specialairhistart: 'Devil Wings (Startup) (Air)',
+
+    game_speciallw: 'Heaven\'s Door (Startup)',
+    game_specialairlw: 'Heaven\'s Door (Startup) (Air)',
+    game_speciallwcatch: 'Heaven\'s Door (Catch)',
+    game_speciallwfall: 'Heaven\'s Door (Fall)',
+    game_speciallwground: 'Heaven\'s Door (Ground)',
+  },
   eflame: {
     game_specialnstart: 'Flame Nova (Startup)',
     game_specialnhold: 'Flame Nova (Charge)',
@@ -48,6 +80,8 @@ export const MOVE_NAMES: Record<string, Record<string, NameOverride>> = {
     game_specialsflick: 'Blazing End (Flick)',
     game_specialairs: 'Blazing End (Air)',
     game_specialairsflick: 'Blazing End (Flick) (Air)',
+    game_specialscatch: 'Blazing End (Catch Sword)',
+    game_specialairscatch: 'Blazing End (Catch Sword) (Air)',
 
     game_specialhistart: 'Prominence Revolt (Startup)',
     game_specialairhistart: 'Prominence Revolt (Startup) (Air)',
@@ -55,7 +89,11 @@ export const MOVE_NAMES: Record<string, Record<string, NameOverride>> = {
     game_specialairhifall: 'Prominence Revolt (Fall)',
     game_specialhi: 'Prominence Revolt (Landing)',
 
+    game_speciallw: 'Switch to Mythra',
+    game_speciallwend: 'Switched from Mythra',
     game_speciallwattack: 'Double Spinning Edge',
+    game_specialairlw: 'Switch to Mythra (Air)',
+    game_specialairlwend: 'Switched from Mythra (Air)',
     game_specialairlwattack: 'Double Spinning Edge (Air)',
   },
   elight: {
@@ -82,20 +120,43 @@ export const MOVE_NAMES: Record<string, Record<string, NameOverride>> = {
     game_specialairhi2: 'Chroma Dust (Fire)',
     game_specialairhiend: 'Ray of Punishment (Fall)',
 
+    game_speciallw: 'Switch to Pyra',
+    game_speciallwend: 'Switched from Pyra',
     game_speciallwattack: 'Rolling Smash',
+    game_specialairlw: 'Switch to Pyra (Air)',
+    game_specialairlwend: 'Switched from Pyra (Air)',
     game_specialairlwattack: 'Rolling Smash (Air)',
   },
   mario: {
     game_specialn: 'Fireball',
-    game_specialairn: 'Fireball (air)',
-    game_specials: 'Cape',
-    game_specialairs: 'Cape (air)',
+    game_specialairn: 'Fireball (Air)',
+    game_specials: 'Star Spin',
+    game_specialairs: 'Star Spin (Air)',
     game_specialhi: 'Super Jump Punch',
     game_specialairhi: 'Super Jump Punch (air)',
-    game_speciallw: 'F.L.U.D.D.',
-    game_specialairlw: 'F.L.U.D.D. (air)',
+    game_speciallwstart: 'Long Jump (Startup)',
+    game_speciallwjump: 'Long Jump (Jump)',
+    game_speciallwlanding: 'Long Jump (Landing)',
+    game_specialairlwstart: 'Ground Pound (Startup)',
+    game_specialairlwfall: 'Ground Pound (Fall)',
+    game_specialairlwlanding: 'Ground Pound (Landing)',
+    game_specialairlwcancel: 'Ground Pound (Cancel)'
   },
   ryu: {
+    game_attack11s: 'Heavy Jab',
+    game_attack11w: 'Light Jab 1',
+    game_attack12: 'Light Jab 2',
+    game_attack13: 'Light Jab 3',
+
+    game_attacks3s: 'Collarbone Breaker (Heavy Forward Tilt)',
+    game_attacks3w: 'Light Forward Tilt',
+
+    game_attackhi3s: 'Heavy Up Tilt',
+    game_attackhi3w: 'Light Up Tilt',
+
+    game_attacklw3s: 'Heavy Down Tilt',
+    game_attacklw3w: 'Light Down Tilt',
+
     game_specialn: 'Hadoken',
     game_specialairn: 'Hadoken (Air)',
 
@@ -120,6 +181,7 @@ export const MOVE_NAMES: Record<string, Record<string, NameOverride>> = {
     game_specialairhi: 'Shoryuken (Air)',
     game_specialairhicommand: 'Shoryuken (Command Input) (Air)',
     game_specialairhiend: 'Shoryuken (End)',
+    game_specialhilanding: 'Shoryuken (Landing)',
 
     game_speciallw: 'Denjin Charge',
     game_specialairlw: 'Denjin Charge (Air)',
@@ -177,7 +239,7 @@ export const ARTICLE_NAMES: Record<string, Record<string, string>> = {
   },
   mario: {
     mario_fireball: 'Fireball',
-    mario_pumpwater: 'F.L.U.D.D.',
+    mario_hugeflame: 'Mario Finale (Final Smash)',
   },
   ryu: {
     ryu_hadoken: 'Hadoken',

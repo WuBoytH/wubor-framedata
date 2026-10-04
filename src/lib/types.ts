@@ -6,7 +6,8 @@
 export type Val = number | boolean | string | null | { expr: string }
 
 export type Side = 'wubor' | 'vanilla'
-export type Origin = 'modded' | 'vanilla'
+/** `motion`: no `game_` script anywhere; the entry exists because motion_list names the move (FAF / total only). */
+export type Origin = 'modded' | 'vanilla' | 'motion'
 
 export interface Span {
   start: number
