@@ -4,7 +4,7 @@
   import { fighterName, agentLabel, mainAgent } from '../lib/fighters'
   import { href } from '../lib/router.svelte'
   import { moveInfo } from '../lib/moves'
-  import { summarize, fmtSpan, fmtSpans, fmtFrame, fmtNum, fmtVal, short, windowIds, groupWindows, landingLag } from '../lib/format'
+  import { summarize, fmtSpan, fmtSpans, fmtFrame, fmtNum, fmtVal, short, windowIds, groupWindows, landingLag, DEFAULT_TARGET, HITSTUN_PERCENTS, stunKindMul } from '../lib/format'
   import FrameBar from '../components/FrameBar.svelte'
   import HitboxTable from '../components/HitboxTable.svelte'
   import BoxTable from '../components/BoxTable.svelte'
@@ -14,6 +14,18 @@
   const data = $derived(loadFighter('wubor', id))
   const info = $derived(moveInfo(script, id, agent))
   let vi = $state(0)
+  // Stun constants for this side; the opponent the hitstun column assumes.
+  const stun = $derived(idx.common?.wubor?.stun ?? null)
+  const kindMul = $derived(stun ? stunKindMul(script, stun) : 1)
+  // Hitstun target: a fighter from the index (its weight), or the default weight.
+  let targetId = $state('')
+  const targets = $derived(
+    idx.wubor
+      .filter((f) => typeof f.weight === 'number')
+      .map((f) => ({ id: f.id, name: fighterName(f.id), weight: f.weight as number }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  )
+  const target = $derived({ ...DEFAULT_TARGET, weight: targets.find((f) => f.id === targetId)?.weight ?? DEFAULT_TARGET.weight })
   // reset the variant tab when navigating between moves
   $effect(() => { script; agent; vi = 0 })
 
@@ -51,7 +63,7 @@
   {:else}
     {@const views = orderVariants(s.variants, id, agent, script)}
     {@const v = views[Math.min(vi, views.length - 1)].variant}
-    {@const sum = summarize(v, idx.hitbox_fields)}
+    {@const sum = summarize(v, idx.hitbox_fields, stun, kindMul)}
     {@const landing = landingLag(f.landing_lag, script)}
     <h1>
       {info.name}
@@ -87,6 +99,7 @@
         <div class="stat"><div class="k">Total</div><div class="v">{sum.total === null ? '—' : fmtNum(sum.total)}</div></div>
       {/if}
       <div class="stat"><div class="k">Damage</div><div class="v small-v mono">{sum.damage.length ? sum.damage.map(fmtNum).join(' / ') : '—'}</div></div>
+      {#if sum.shieldStun.length}<div class="stat"><div class="k">Shield stun</div><div class="v small-v mono">{sum.shieldStun.join(' / ')}</div></div>{/if}
       {#if landing}<div class="stat"><div class="k">Landing lag</div><div class="v">{landing.lag}</div>{#if landing.shoot !== null}<div class="small faint">+{landing.shoot} with Bullet Arts</div>{/if}</div>{/if}
       {#if v.autocancel.length}<div class="stat"><div class="k">Autocancel</div><div class="v small-v mono">{fmtSpans(v.autocancel)}</div></div>{/if}
       {#if s.motion && s.motion.xlu_end > 0}<div class="stat"><div class="k">Intangible</div><div class="v small-v mono">{s.motion.xlu_start}–{s.motion.xlu_end}</div></div>{/if}
@@ -103,9 +116,19 @@
 
     {#if v.windows.length}
       <h2>Hitboxes</h2>
+      {#if stun}
+        <div class="row small muted calc">
+          <span>Hitstun at {HITSTUN_PERCENTS.join(' / ')}% vs</span>
+          <select bind:value={targetId}>
+            <option value="">weight {DEFAULT_TARGET.weight} (default)</option>
+            {#each targets as f}<option value={f.id}>{f.name} ({f.weight})</option>{/each}
+          </select>
+          <span class="faint">set-knockback hits show one value{stun.one_on_one_damage_mul !== 1 ? ` · 1v1 damage ×${stun.one_on_one_damage_mul}` : ''}</span>
+        </div>
+      {/if}
       {#each groupWindows(v.windows) as w}
         <h3>Frames {fmtSpan(w)} <span class="muted small">id {windowIds(w, idx.hitbox_fields)}{w.tags.length ? ` · ${w.tags.join(', ')}` : ''}</span></h3>
-        <HitboxTable hitboxes={w.boxes} fields={idx.hitbox_fields} />
+        <HitboxTable hitboxes={w.boxes} fields={idx.hitbox_fields} {stun} {target} {kindMul} />
       {/each}
     {/if}
 
@@ -171,6 +194,7 @@
 
 <style>
   .variants { margin: .5rem 0; }
+  .calc { margin: .25rem 0 .5rem; align-items: center; gap: .4rem; flex-wrap: wrap; }
   .small-v { font-size: 1rem; }
   tr.attack td { color: var(--c-active); }
   tr.catch td { color: var(--c-grab); }

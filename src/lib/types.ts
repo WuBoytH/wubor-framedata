@@ -156,11 +156,36 @@ export interface Fighter {
 
 export interface IndexEntry {
   id: string
+  /** `fighter_param_table` weight (for the hitstun target picker); absent if unknown */
+  weight?: number | null
   agents: string[]
   scripts: number
   modded: number
   params_changed: number
   cancel_rules: number
+}
+
+/** Constants behind shield stun / hitstun (generator README "Stun"). */
+export interface StunParams {
+  shield_setoff_mul: number
+  shield_setoff_add: number
+  shield_stiff_frame_max: number
+  just_shield_setoff_mul: number
+  /** attack-kind multipliers folded into the per-hit setoff mul (all 1 in the mod) */
+  shield_stiff_mul_attack_air: number
+  shield_stiff_mul_attack_4: number
+  shield_setoff_mul_fighter_shot: number
+  guard_off_cancel_frame: number
+  /** hitstun frames per unit of knockback */
+  hitstun_mul: number
+  /** damage multiplier in 1v1 (vanilla 1.2; 1 in the mod) */
+  one_on_one_damage_mul: number
+  /** extra stun frames while burnt out (mod only) */
+  burnout_stun_penalty: number
+}
+
+export interface Common {
+  stun: StunParams
 }
 
 export interface Index {
@@ -170,4 +195,6 @@ export interface Index {
   search_fields: string[]
   wubor: IndexEntry[]
   vanilla?: IndexEntry[]
+  /** per side (`wubor` / `vanilla`) */
+  common?: Record<string, Common>
 }
