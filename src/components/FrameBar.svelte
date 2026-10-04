@@ -4,7 +4,7 @@
   // intangible) and every lane also carries a text label, so colour is never
   // the only encoding.
   import type { Variant, Motion, Index, BoxWindow } from '../lib/types'
-  import { fmtSpan, windowIds, short, groupWindows } from '../lib/format'
+  import { fmtSpan, windowIds, short, groupWindows, cancelWindows } from '../lib/format'
 
   let { variant, motion, idx }: { variant: Variant; motion: Motion | null; idx: Index } = $props()
 
@@ -21,7 +21,7 @@
       faf ?? 0,
       ...[...variant.windows, ...variant.grabs, ...variant.searches].map((w) => w.end ?? w.start),
       ...variant.autocancel.map((w) => w.end ?? w.start),
-      ...variant.cancels.map((c) => c.window.end ?? c.window.start),
+      ...cancelWindows(variant).map((c) => c.window.end ?? c.window.start),
     ]
     return Math.max(1, ...ends)
   })
@@ -48,7 +48,7 @@
       out.push({ label: 'Autocancel', role: 'autocancel', segs: variant.autocancel.map((w) => ({ start: w.start, end: clip(w.end), title: `Autocancel f${fmtSpan(w)}` })) })
     }
     const byKind = new Map<string, Seg[]>()
-    for (const c of variant.cancels) {
+    for (const c of cancelWindows(variant)) {
       const on = c.on.length ? ` on ${c.on.join('/')}` : ''
       const seg = { start: c.window.start, end: clip(c.window.end), title: `${c.kind} cancel${on} f${fmtSpan(c.window)}${c.flag ? ` [${short(c.flag)}]` : ''}` }
       byKind.set(c.kind, [...(byKind.get(c.kind) ?? []), seg])

@@ -4,7 +4,7 @@
   import { fighterName, agentLabel, mainAgent } from '../lib/fighters'
   import { href } from '../lib/router.svelte'
   import { moveInfo } from '../lib/moves'
-  import { summarize, fmtSpan, fmtSpans, fmtFrame, fmtNum, fmtVal, short, windowIds, groupWindows, landingLag, DEFAULT_TARGET, HITSTUN_PERCENTS, stunKindMul } from '../lib/format'
+  import { summarize, fmtSpan, fmtSpans, fmtFrame, fmtNum, fmtVal, short, windowIds, groupWindows, landingLag, cancelWindows, DEFAULT_TARGET, HITSTUN_PERCENTS, stunKindMul } from '../lib/format'
   import FrameBar from '../components/FrameBar.svelte'
   import HitboxTable from '../components/HitboxTable.svelte'
   import BoxTable from '../components/BoxTable.svelte'
@@ -148,12 +148,13 @@
       {/each}
     {/if}
 
-    {#if v.cancels.length}
+    {@const cancels = cancelWindows(v)}
+    {#if cancels.length}
       <h2>Cancels</h2>
       <div class="table-wrap"><table class="small">
         <thead><tr><th>Kind</th><th>On</th><th>Window</th><th>Flag</th><th>Into</th></tr></thead>
         <tbody>
-          {#each v.cancels as c}
+          {#each cancels as c}
             <tr>
               <td>{c.kind.replace('_', ' ')}{c.alt_flag ? ` (alt: ${short(c.alt_flag)})` : ''}</td>
               <td>{c.on.length ? c.on.join(' / ') : 'always'}</td>

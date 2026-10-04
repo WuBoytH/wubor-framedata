@@ -1,4 +1,4 @@
-import type { Span, Val, Variant, Script, BoxWindow, StunParams } from './types'
+import type { Span, Val, Variant, Script, BoxWindow, StunParams, CancelWindow } from './types'
 
 export function fmtSpan(w: Span): string {
   if (w.end === null) return `${w.start}+`
@@ -163,6 +163,21 @@ export function summarize(v: Variant, fields: string[], stun: StunParams | null 
     autocancel: v.autocancel,
     hitboxes: v.windows.reduce((n, w) => n + w.boxes.length, 0),
   }
+}
+
+/**
+ * The variant's cancel windows as the mod applies them. The jab → jab / tilt
+ * combo window (`ENABLE_COMBO`) is lost once the move reaches its FAF, so a
+ * `jab_combo` window running past it is clipped to FAF − 1 (and dropped if
+ * that leaves nothing).
+ */
+export function cancelWindows(v: Variant): CancelWindow[] {
+  const faf = v.faf ?? null
+  if (faf === null) return v.cancels
+  return v.cancels.flatMap((c) => {
+    if (c.kind !== 'jab_combo' || (c.window.end !== null && c.window.end < faf)) return [c]
+    return c.window.start < faf ? [{ ...c, window: { start: c.window.start, end: faf - 1 } }] : []
+  })
 }
 
 export interface LandingLag {

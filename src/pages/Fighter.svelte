@@ -4,7 +4,7 @@
   import { fighterName, agentLabel, mainAgent } from '../lib/fighters'
   import { href } from '../lib/router.svelte'
   import { moveInfo, CATEGORIES, type Category } from '../lib/moves'
-  import { summarize, hasHitboxes, landingLag } from '../lib/format'
+  import { summarize, hasHitboxes, landingLag, cancelWindows } from '../lib/format'
   import MoveTable, { type Row } from '../components/MoveTable.svelte'
   import { orderVariants } from '../lib/variants'
   import ParamList from '../components/ParamList.svelte'
@@ -36,7 +36,7 @@
       if (!views.length) continue
       const primary = views[0]
       const summary = summarize(primary.variant, idx.hitbox_fields)
-      const sig = (v: typeof primary) => JSON.stringify([summarize(v.variant, idx.hitbox_fields), v.variant.cancels.map((c) => [c.kind, c.window])])
+      const sig = (v: typeof primary) => JSON.stringify([summarize(v.variant, idx.hitbox_fields), cancelWindows(v.variant).map((c) => [c.kind, c.window])])
       const primarySig = sig(primary)
       out.push({
         href: href.move(id, agent, name),
@@ -48,7 +48,7 @@
         modded: s.origin === 'modded',
         summary,
         landing: landingLag(f.landing_lag, name),
-        cancels: primary.variant.cancels.length,
+        cancels: cancelWindows(primary.variant).length,
         intangible: s.motion && s.motion.xlu_end > 0 ? `${s.motion.xlu_start}–${s.motion.xlu_end}` : null,
       })
     }

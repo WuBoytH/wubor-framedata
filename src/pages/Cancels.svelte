@@ -4,7 +4,7 @@
   import { fighterName, mainAgent } from '../lib/fighters'
   import { href } from '../lib/router.svelte'
   import { moveInfo } from '../lib/moves'
-  import { short, fmtSpan } from '../lib/format'
+  import { short, fmtSpan, cancelWindows } from '../lib/format'
   import { orderVariants } from '../lib/variants'
   import { moveVisible } from '../lib/visibility'
 
@@ -19,7 +19,7 @@
     const out = []
     for (const [name, s] of Object.entries(f.agents[main] ?? {})) {
       if (!moveVisible(id, main, name)) continue
-      for (const { variant: v, label } of orderVariants(s.variants)) for (const c of v.cancels) {
+      for (const { variant: v, label } of orderVariants(s.variants)) for (const c of cancelWindows(v)) {
         out.push({ name, move: moveInfo(name, id, main).name, variant: s.variants.length > 1 ? label || 'unmodified' : '', c })
       }
     }
